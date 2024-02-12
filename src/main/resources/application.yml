@@ -1,0 +1,9 @@
+greeting:
+  message: "hello"
+quarkus:
+  datasource:
+    db-kind: postgresql
+    username: sa
+    password: sa
+    jdbc:
+      url: jdbc:tc:postgresql:latest:///dbname?TC_INITSCRIPT=import.sql
