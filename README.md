@@ -1,81 +1,35 @@
-# jdbcnative
-
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
-
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
-
-## Running the application in dev mode
-
-You can run your application in dev mode that enables live coding using:
-```shell script
-./mvnw compile quarkus:dev
-```
-
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
-
-## Packaging and running the application
-
-The application can be packaged using:
-```shell script
-./mvnw package
-```
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
-
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
-```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using: 
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/jdbcnative-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
-
-## Related Guides
-
-- Hibernate Validator ([guide](https://quarkus.io/guides/validation)): Validate object properties (field, getter) and method parameters for your beans (REST, CDI, Jakarta Persistence)
-- RESTEasy Reactive ([guide](https://quarkus.io/guides/resteasy-reactive)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- YAML Configuration ([guide](https://quarkus.io/guides/config-yaml)): Use YAML to configure your Quarkus application
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplify your persistence code for Hibernate ORM via the active record or the repository pattern
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
-
-## Provided Code
-
-### YAML Config
-
-Configure your application with YAML
-
-[Related guide section...](https://quarkus.io/guides/config-reference#configuration-examples)
-
-The Quarkus application configuration is located in `src/main/resources/application.yml`.
-
-### Hibernate ORM
-
-Create your first JPA entity
-
-[Related guide section...](https://quarkus.io/guides/hibernate-orm)
-
-[Related Hibernate with Panache section...](https://quarkus.io/guides/hibernate-orm-panache)
-
-
-### RESTEasy Reactive
-
-Easily start your Reactive RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+# showcase native image build failure
+- tests were performed on mac M1 and linux amd64 processors
+- run `./mvnw clean  package -Dnative -Dquarkus.native.container-build=true -DskipTests` 
+- inspect application.yml - errors differ based on hardcoded `quarkus.config.jdbc.url` and friends properties!
+- if there is no hardcoded url
+  - ```
+    Caused by: io.smallrye.config.ConfigValidationException: Configuration validation failed:
+    java.util.NoSuchElementException: SRCFG00011: Could not expand value quarkus.datasource.jdbc.url in property quarkus.config.source.jdbc.url
+    java.util.NoSuchElementException: SRCFG00011: Could not expand value quarkus.datasource.username in property quarkus.config.source.jdbc.username
+    java.util.NoSuchElementException: SRCFG00011: Could not expand value quarkus.datasource.password in property quarkus.config.source.jdbc.password
+    ```
+- if there is hardcoded url
+  - ```
+    Caused by: java.lang.RuntimeException: Unable to get java.sql.Driver from DriverManager
+    at io.agroal.pool.ConnectionFactory.newDriver(ConnectionFactory.java:130)
+    at io.agroal.pool.ConnectionFactory.<init>(ConnectionFactory.java:69)
+    at io.agroal.pool.ConnectionPool.<init>(ConnectionPool.java:108)
+    at io.agroal.pool.DataSource.<init>(DataSource.java:37)
+    at io.agroal.pool.DataSourceProvider.getDataSource(DataSourceProvider.java:21)
+    at io.agroal.api.AgroalDataSource.from(AgroalDataSource.java:41)
+    at io.quarkiverse.config.jdbc.runtime.Repository.prepareDataSource(Repository.java:107)
+    at io.quarkiverse.config.jdbc.runtime.Repository.<init>(Repository.java:32)
+    at io.quarkiverse.config.jdbc.runtime.JdbcConfigSourceFactory.getConfigSources(JdbcConfigSourceFactory.java:37)
+    at io.smallrye.config.ConfigurableConfigSource.getConfigSources(ConfigurableConfigSource.java:50)
+    at io.smallrye.config.SmallRyeConfig$ConfigSources.mapLateSources(SmallRyeConfig.java:845)
+    at io.smallrye.config.SmallRyeConfig$ConfigSources.<init>(SmallRyeConfig.java:735)
+    at io.smallrye.config.SmallRyeConfig.<init>(SmallRyeConfig.java:81)
+    at io.smallrye.config.SmallRyeConfigBuilder.build(SmallRyeConfigBuilder.java:724)
+    at io.quarkus.runtime.generated.Config.<clinit>(Unknown Source)
+    ... 42 more
+    Caused by: java.sql.SQLException: No suitable driver
+    at java.sql/java.sql.DriverManager.getDriver(DriverManager.java:300)
+    at io.agroal.pool.ConnectionFactory.newDriver(ConnectionFactory.java:128)
+    ... 56 more
+    ```

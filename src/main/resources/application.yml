@@ -1,9 +1,15 @@
 greeting:
   message: "hello"
-quarkus:
-  datasource:
-    db-kind: postgresql
-    username: sa
-    password: sa
-    jdbc:
-      url: jdbc:tc:postgresql:latest:///dbname?TC_INITSCRIPT=import.sql
+#quarkus:
+#  datasource:
+#    db-kind: postgresql
+#    username: quarkus
+#    password: quarkus
+#    jdbc:
+#      url: jdbc:postgresql://127.0.0.1:54730/quarkus?loggerLevel=OFF
+#  config:
+#    source:
+#      jdbc:
+#        url: jdbc:postgresql://127.0.0.1:54730/quarkus?loggerLevel=OFF
+#        username: quarkus
+#        password: quarkus
